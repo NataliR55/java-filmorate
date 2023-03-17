@@ -16,7 +16,6 @@ public class User {
     @Email(message = "Field: Email must have the format EMAIL!")
     @NotBlank(message = "Field: Email must be filled!")
     private String email;
-    //@NotBlank(message = "Field: login must be filled!")
     @Pattern(regexp = "^[a-zA-z]{1}[a-zA-Z0-9_]{4,20}$", message = "Field: login is fails format!")
     private String login;
     private String name;

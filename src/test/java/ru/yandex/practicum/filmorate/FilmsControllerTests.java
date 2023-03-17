@@ -96,7 +96,7 @@ public class FilmsControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        assertEquals(filmsController.getOne(1).getDescription(), "b".repeat(200));
+        assertEquals(filmsController.getById(1).getDescription(), "b".repeat(200));
 
 
     }
@@ -119,7 +119,7 @@ public class FilmsControllerTests {
                 .andExpect(status().isOk());
         System.out.println(filmsController.getAllFilms());
         assertEquals(filmsController.getAllFilms().size(), 1);
-        assertEquals(filmsController.getOne(1).getId(), 1);
+        assertEquals(filmsController.getById(1).getId(), 1);
         film = createOne(1);
         film.setReleaseDate(LocalDate.of(1800, 12, 28));
         film.setId(1);
@@ -128,7 +128,7 @@ public class FilmsControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        assertEquals(filmsController.getOne(1).getReleaseDate(), LocalDate.of(1895, 12, 28));
+        assertEquals(filmsController.getById(1).getReleaseDate(), LocalDate.of(1895, 12, 28));
     }
 
     @Test
@@ -149,7 +149,7 @@ public class FilmsControllerTests {
                 .andExpect(status().isOk());
         System.out.println(filmsController.getAllFilms());
         assertEquals(filmsController.getAllFilms().size(), 1);
-        assertEquals(filmsController.getOne(1).getDuration(), 100);
+        assertEquals(filmsController.getById(1).getDuration(), 100);
         film = createOne(2);
         film.setDuration(0);
         film.setId(1);
@@ -158,7 +158,7 @@ public class FilmsControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        assertEquals(filmsController.getOne(1).getDuration(), 100);
+        assertEquals(filmsController.getById(1).getDuration(), 100);
     }
 
     private Film createOne(int id) {

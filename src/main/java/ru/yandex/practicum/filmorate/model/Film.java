@@ -15,7 +15,6 @@ import java.time.LocalDate;
 @Data
 @Builder
 public class Film {
-    public static final LocalDate controlDate = LocalDate.of(1895, 12, 28);
     private int id;
     @NotBlank(message = "Field: name must be filled!")
     private String name;
@@ -26,17 +25,4 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Duration film must be positive!")
     private int duration;
-
-    public static boolean checkReleaseDate(Film film) {
-        if (film.releaseDate == null) {
-            log.info("{} Release Date not by null ", film.releaseDate);
-            return false;
-        }
-        if (film.releaseDate.isBefore(controlDate)) {
-            log.info("{} Release Date not by before {}", film.releaseDate, controlDate);
-            return false;
-        }
-        return true;
-    }
-
 }

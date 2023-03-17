@@ -46,7 +46,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getOne(@PathVariable("id") Integer id) {
+    public User getById(@PathVariable("id") Integer id) {
         if (id == null) {
             log.info("User id is null!");
             throw new ValidationException();
@@ -112,7 +112,7 @@ public class UserController {
 
     private void changeLoginAndNameUser(User user) {
         if (user == null) return;
-        String login = user.getLogin() == null ? null : user.getLogin().trim();
+        String login = user.getLogin() == null ? null : user.getLogin();
         String name = user.getName() == null ? null : user.getName().trim();
         String userName = (name == null || name.isBlank()) ? login : name;
         user.setName(userName);
