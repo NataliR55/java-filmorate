@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.Film;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
 import java.time.LocalDate;
@@ -22,6 +24,12 @@ public class FilmsController {
     private final Map<Integer, Film> films = new HashMap<>();
     private int generateId = 0;
     public static final LocalDate controlDate = LocalDate.of(1895, 12, 28);
+    private final FilmService filmService;
+    @Autowired
+    public FilmsController(FilmService filmService) {
+        this.filmService = filmService;
+    }
+
 
     @PostMapping()
     public Film create(@Valid @RequestBody Film film) {

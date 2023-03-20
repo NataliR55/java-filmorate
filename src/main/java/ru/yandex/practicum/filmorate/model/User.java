@@ -8,6 +8,7 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Past;
 import javax.validation.constraints.Pattern;
 import java.time.LocalDate;
+import java.util.Set;
 
 @Data
 @Builder
@@ -21,5 +22,6 @@ public class User {
     private String name;
     @Past(message = "Date of birth must be less than today")
     private LocalDate birthday;
+    private Set<Long> friends;
 }
 
