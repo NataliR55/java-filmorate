@@ -20,7 +20,7 @@ public class UserService {
     public UserService(InMemoryUserStorage inMemoryUserStorage) {
         this.inMemoryUserStorage = inMemoryUserStorage;
     }
-/*
+
     User create(User user){
         return user;
     }
@@ -29,7 +29,9 @@ public class UserService {
         return user;
     }
 
-    List<User> getAllUsers();
+    List<User> getAllUsers(){
+        return List.of(new User());
+    }
 
     List<User> getUsersFriends(int id);
 
@@ -41,5 +43,5 @@ public class UserService {
 
     void deleteFriend(int id, int friendId);
 
- */
+
 }

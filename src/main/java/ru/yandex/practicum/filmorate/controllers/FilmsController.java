@@ -33,7 +33,7 @@ public class FilmsController {
 
     @PostMapping()
     public Film create(@Valid @RequestBody Film film) {
-        if (!checkReleaseDate(film)) throw new ValidationException();
+        if (!checkReleaseDate(film)) throw new ValidationException("");
         film.setId(++generateId);
         films.put(film.getId(), film);
         log.info("Create {}", film);
@@ -46,9 +46,9 @@ public class FilmsController {
         int id = film.getId();
         if (!films.containsKey(id)) {
             log.info("Film with id: {} is NOT found!", id);
-            throw new NotFoundException();
+            throw new NotFoundException("");
         }
-        if (!checkReleaseDate(film)) throw new ValidationException();
+        if (!checkReleaseDate(film)) throw new ValidationException("");
         films.put(id, film);
         log.info("Update {}!", film);
         return film;
@@ -69,12 +69,12 @@ public class FilmsController {
     public Film getById(@PathVariable("id") Integer id) {
         if (id == null) {
             log.info("Film id is null!");
-            throw new ValidationException();
+            throw new ValidationException("");
         }
         Film film = films.get(id);
         if (film == null) {
             log.info("Film with id: {} is NOT found!", id);
-            throw new NotFoundException();
+            throw new NotFoundException("");
         }
         return film;
     }

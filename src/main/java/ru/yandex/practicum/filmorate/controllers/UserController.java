@@ -1,11 +1,13 @@
 package ru.yandex.practicum.filmorate.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
 import java.util.HashMap;
@@ -20,7 +22,13 @@ import java.util.stream.Collectors;
 @Validated
 public class UserController {
     private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
     private int generateId = 0;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @PostMapping()
     public User create(@Valid @RequestBody User user) {
@@ -118,4 +126,48 @@ public class UserController {
         user.setName(userName);
         user.setLogin(login);
     }
+
+
+
+    @GetMapping("/{id}")
+    public User getUser(@PathVariable(required = false) int id) {
+        return userService.getUser(id);
+    }
+
+    @GetMapping()
+    public List<User> getAllUsers() {
+        return userService.getAllUsers();
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getUsersFriends(@PathVariable int id) {
+        return userService.getUsersFriends(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable(required = false) int id, @PathVariable(required = false) int otherId) {
+        return userService.getCommonFriends(id, otherId);
+    }
+
+    @PostMapping()
+    public User createUser(@Valid @RequestBody User user) {
+        return userService.create(buildUser(user));
+    }
+
+    @PutMapping()
+    public User updateUser(@Valid @RequestBody User user) {
+        return userService.update(buildUser(user));
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+
 }
