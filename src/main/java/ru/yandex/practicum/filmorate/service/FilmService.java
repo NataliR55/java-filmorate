@@ -3,32 +3,68 @@ package ru.yandex.practicum.filmorate.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.List;
 
 @Service
 public class FilmService {
 
-    private final InMemoryFilmStorage inMemoryFilmStorage;
+    private final FilmStorage filmStorage;
+    private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(InMemoryFilmStorage inMemoryFilmStorage) {
-        this.inMemoryFilmStorage = inMemoryFilmStorage;
+    public FilmService(FilmStorage filmStorage, UserStorage userStorage) {
+        this.filmStorage = filmStorage;
+        this.userStorage = userStorage;
     }
-/*
-    Film getFilm(int id);
 
-    List<Film> getAllFilms();
+    public Film createFilm(Film film) {
+        return filmStorage.createFilm(rebuildFilm(film));
+    }
 
-    List<Film> getPopularFilms(int countTopFilms);
+    public Film updateFilm(Film film) {
+        return filmStorage.createFilm(rebuildFilm(film));
+    }
 
-    Film create(Film film);
+    public Film getFilm(int id) {
+        return filmStorage.getFilm(id);
+    }
 
-    public Film update(Film film, int id);
+    public List<Film> getAllFilms() {
+        return filmStorage.getAllFilms();
+    }
 
-    void like(int filmId, int userId);
+    public List<Film> getPopularFilms(int count) {
+        return filmStorage.getPopularFilms(count);
+    }
 
-    void deleteLike(int filmId, long userId);
-*/
+    public void like(int filmId, int userId) {
+        if (userStorage.getUser(userId) != null)
+            filmStorage.like(filmId, userId);
+    }
+
+    public void deleteLike(int filmId, int userId) {
+        if (userStorage.getUser(userId) != null)
+            filmStorage.deleteLike(filmId, userId);
+    }
+    public void clearAllFilms() {
+        filmStorage.clearAllFilms();
+    }
+
+    public void deleteFilm(int id){
+        filmStorage.deleteFilm(id);
+
+    }
+
+    private Film rebuildFilm(Film film) {
+        return Film.builder()
+                .id(film.getId())
+                .name(film.getName())
+                .description(film.getDescription())
+                .releaseDate(film.getReleaseDate())
+                .duration(film.getDuration())
+                .build();
+    }
 }

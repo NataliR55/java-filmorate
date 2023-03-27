@@ -1,47 +1,67 @@
 package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.storage.InMemoryFilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class UserService {
-
-    private final InMemoryUserStorage inMemoryUserStorage;
+    private final InMemoryUserStorage userStorage;
+    private final FilmStorage filmStorage;
 
     @Autowired
-    public UserService(InMemoryUserStorage inMemoryUserStorage) {
-        this.inMemoryUserStorage = inMemoryUserStorage;
+    public UserService(InMemoryUserStorage userStorage, FilmStorage filmStorage) {
+        this.userStorage = userStorage;
+        this.filmStorage = filmStorage;
     }
 
-    User create(User user){
-        return user;
+    public User createUser(User user) {
+        return userStorage.createUser(rebuildUser(user));
     }
 
-    User getUser(int id) {
-        return user;
+    public User updateUser(User user) {
+        return userStorage.updateUser(rebuildUser(user));
     }
 
-    List<User> getAllUsers(){
-        return List.of(new User());
+    public User getUser(int id) {
+        return userStorage.getUser(id);
     }
 
-    List<User> getUsersFriends(int id);
+    public List<User> getAllUsers() {
+        return userStorage.getAllUsers();
+    }
 
-    List<User> getCommonFriends(int id, int otherId);
+    public void addFriend(int id, int friendId) {
+        userStorage.addFriend(id, friendId);
+    }
 
-    User update(User user);
+    public void deleteFriend(int id, int friendId) {
+        userStorage.deleteFriend(id, friendId);
+    }
 
-    void addFriend(int id, int friendId);
+    public List<User> getUsersFriends(int id) {
+        return userStorage.getUsersFriends(id);
+    }
 
-    void deleteFriend(int id, int friendId);
+    public List<User> getCommonFriends(int id, int otherId) {
+        return userStorage.getCommonFriends(id, otherId);
+    }
 
-
+    public void clearAllUsers(){
+        userStorage.clearAllUser();
+        filmStorage.clearAllLikes();
+    }
+    private User rebuildUser(User user) {
+        return User.builder()
+                .id(user.getId())
+                .login(user.getLogin())
+                .name(user.getName())
+                .email(user.getEmail())
+                .birthday(user.getBirthday())
+                .build();
+    }
 }
