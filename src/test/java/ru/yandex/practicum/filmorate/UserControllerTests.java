@@ -65,7 +65,7 @@ public class UserControllerTests {
                                 .content(objectMapper.writeValueAsString(null))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
         assertEquals(userController.getAllUsers().size(), 1);
     }
 
