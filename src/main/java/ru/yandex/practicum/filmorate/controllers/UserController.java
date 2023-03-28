@@ -33,6 +33,7 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User user) {
         return userService.updateUser(user);
     }
+
     @GetMapping()
     public List<User> getAllUsers() {
         return userService.getAllUsers();
@@ -62,7 +63,8 @@ public class UserController {
     public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
         userService.deleteFriend(id, friendId);
     }
-    public void clearAllUser(){
+
+    public void clearAllUser() {
         userService.clearAllUsers();
     }
 
