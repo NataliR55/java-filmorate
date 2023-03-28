@@ -32,6 +32,7 @@ public class Film {
 
     public static class FilmBuilder {
         private LocalDate releaseDate;
+
         public FilmBuilder releaseDate(LocalDate releaseDate) {
             if (releaseDate.isBefore(controlDate)) {
                 throw new ValidationException("Release Date not by before " + controlDate);
