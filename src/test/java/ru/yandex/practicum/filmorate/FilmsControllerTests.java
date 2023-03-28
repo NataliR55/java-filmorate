@@ -32,6 +32,15 @@ public class FilmsControllerTests {
         filmsController.clearAllFilms();
     }
 
+    private Film createFilm(int id) {
+        return Film.builder()
+                .id(0)
+                .name("nameFilm" + id)
+                .description("descriptionFilm" + id)
+                .duration((int) (Math.random() * 160))
+                .releaseDate(LocalDate.of(1990, 1, (id < 31 ? id : 1))).build();
+    }
+
     @Test
     public void getFilms() throws Exception {
         Film[] films = {createFilm(1), createFilm(2), createFilm(3), createFilm(4)};
@@ -43,6 +52,22 @@ public class FilmsControllerTests {
             );
         }
         mockMvc.perform(get("/films"))
+                .andExpect(status().isOk());
+        assertEquals(filmsController.getAllFilms().size(), 4);
+        assertEquals(filmsController.getFilm(3).getName(), "nameFilm3");
+
+    }
+
+    @Test
+    public void getAllPopularFilm() throws Exception {
+        Film[] films = {createFilm(1), createFilm(2), createFilm(3), createFilm(4)};
+        for (Film film : films) {
+            mockMvc.perform(post("/films")
+                    .content(objectMapper.writeValueAsString(film))
+                    .contentType(MediaType.APPLICATION_JSON)
+            );
+        }
+        mockMvc.perform(get("/films/popular"))
                 .andExpect(status().isOk());
         assertEquals(filmsController.getAllFilms().size(), 4);
         assertEquals(filmsController.getFilm(3).getName(), "nameFilm3");
@@ -97,8 +122,6 @@ public class FilmsControllerTests {
                 )
                 .andExpect(status().isBadRequest());
         assertEquals(filmsController.getFilm(1).getDescription(), "b".repeat(200));
-
-
     }
 
     @Test
@@ -161,12 +184,5 @@ public class FilmsControllerTests {
         assertEquals(filmsController.getFilm(1).getDuration(), 100);
     }
 
-    private Film createFilm(int id) {
-        return Film.builder()
-                .id(0)
-                .name("nameFilm" + id)
-                .description("descriptionFilm" + id)
-                .duration((int) (Math.random() * 160))
-                .releaseDate(LocalDate.of(1990, 1, (id < 31 ? id : 1))).build();
-    }
+
 }

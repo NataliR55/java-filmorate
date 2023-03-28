@@ -42,19 +42,20 @@ public class FilmService {
     }
 
     public void like(int filmId, int userId) {
-        if (filmStorage.getFilm(filmId) == null)
-            throw new NotFoundException(String.format("Film with id:%s not found.", filmId));
-        if (userStorage.getUser(userId) == null)
-            throw new NotFoundException(String.format("User with id:%s not found.", filmId));
+        filmStorage.filmFound(filmId);
+        userStorage.userFound(userId);
         filmStorage.like(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
-        if (filmStorage.getFilm(filmId) == null)
-            throw new NotFoundException(String.format("Film with id:%s not found.", filmId));
-        if (userStorage.getUser(userId) == null)
-            throw new NotFoundException(String.format("User with id:%s not found.", filmId));
-        filmStorage.deleteLike(filmId, userId);
+            filmStorage.filmFound(filmId);
+            userStorage.userFound(userId);
+            filmStorage.deleteLike(filmId, userId);
+    }
+    public void deleteLikes(int userId) {
+            userStorage.userFound(userId);
+            filmStorage.deleteLikes(userId);
+
     }
 
     public void clearAllFilms() {
@@ -63,7 +64,6 @@ public class FilmService {
 
     public void deleteFilm(int id) {
         filmStorage.deleteFilm(id);
-
     }
 
     private Film rebuildFilm(Film film) {

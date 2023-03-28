@@ -11,6 +11,8 @@ public interface UserStorage {
 
     User getUser(int id);
 
+    void userFound(int id);
+
     List<User> getAllUsers();
 
     void addFriend(int id, int friendId);
@@ -22,5 +24,7 @@ public interface UserStorage {
     List<User> getCommonFriends(int id, int otherId);
 
     void clearAllUser();
+
+    void deleteUser(int id);
 
 }

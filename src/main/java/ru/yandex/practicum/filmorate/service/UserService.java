@@ -2,10 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -28,6 +30,7 @@ public class UserService {
     }
 
     public User getUser(int id) {
+        userStorage.userFound(id);
         return userStorage.getUser(id);
     }
 
@@ -48,13 +51,26 @@ public class UserService {
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
-        return userStorage.getCommonFriends(id, otherId);
+        try {
+            userStorage.userFound(id);
+            userStorage.userFound(otherId);
+            return userStorage.getCommonFriends(id, otherId);
+        } catch (NotFoundException e) {
+            return Collections.EMPTY_LIST;
+        }
     }
 
-    public void clearAllUsers(){
+    public void clearAllUsers() {
         userStorage.clearAllUser();
         filmStorage.clearAllLikes();
     }
+
+    public void deleteUser(int id) {
+        userStorage.userFound(id);
+        filmStorage.deleteLikes(id);
+        userStorage.deleteUser(id);
+    }
+
     private User rebuildUser(User user) {
         return User.builder()
                 .id(user.getId())

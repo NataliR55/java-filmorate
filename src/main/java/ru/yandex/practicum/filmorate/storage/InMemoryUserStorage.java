@@ -18,7 +18,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (findUser(user) != null) {
+        if (findUserByDetails(user) != null) {
             throw new ValidationException(String.format("%s with login or email already exist!", user));
         }
         user.setId(++generateId);
@@ -30,10 +30,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         int id = user.getId();
-        if (getUser(id) == null) {
-            log.info("User with id: {} is NOT found and not update!", id);
-            throw new NotFoundException(String.format("User with id: %d not found and not update!", id));
-        }
+        userFound(id);
         users.put(id, user);
         log.info("Update {}", user);
         return user;
@@ -81,15 +78,17 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
+    public void userFound(int id) {
+        if (users.get(id) == null) {
+            log.info("User with id:{} not exists.", id);
+            throw new NotFoundException(String.format("User with id: %d  is not exist", id));
+        }
+    }
+
+    @Override
     public void addFriend(int id, int friendId) {
-        if (getUser(id) == null) {
-            log.info("User with id:{} not added to friends id:{} ", friendId, id);
-            throw new NotFoundException(String.format("User with id: %d  is not found. Friend  with id:%d NOT add", id, friendId));
-        }
-        if (getUser(friendId) == null) {
-            log.info("User with id:{} not added to friends id:{} ", friendId, id);
-            throw new NotFoundException(String.format("Friend with id: %d  is not found and not added to user with id: %d", friendId, id));
-        }
+        userFound(id);
+        userFound(friendId);
         for (int i = 0; i < 2; i++) {
             int idUser = i == 0 ? id : friendId;
             int idFriend = i == 0 ? friendId : id;
@@ -107,6 +106,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteFriend(int id, int friendId) {
+        userFound(id);
+        userFound(friendId);
         for (int i = 0; i < 2; i++) {
             int idUser = i == 0 ? id : friendId;
             int idFriend = i == 0 ? friendId : id;
@@ -132,7 +133,23 @@ public class InMemoryUserStorage implements UserStorage {
         generateId = 0;
     }
 
-    private User findUser(User user) {
+    @Override
+    public void deleteUser(int id) {
+        if (users.containsKey(id)) {
+            users.remove(id);
+            log.info("User with id {} delete", id);
+            if (userFriends.containsKey(id)) {
+                for (int i : userFriends.get(id)) {
+                    userFriends.get(i).remove(id);
+                }
+                userFriends.remove(id);
+            }
+        } else {
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
+        }
+    }
+
+    private User findUserByDetails(User user) {
         if (user == null) return null;
         Optional<User> userFound;
         String email = user.getEmail();
