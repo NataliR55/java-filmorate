@@ -22,6 +22,7 @@ public class InMemoryFilmStorage implements FilmStorage {
         if (film == null) throw new ValidationException("Film not be null");
         film.setId(++generateId);
         films.put(film.getId(), film);
+        likes.put(film.getId(), new HashSet<>());
         log.info("Create {}", film);
         return film;
 
@@ -30,22 +31,17 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film updateFilm(Film film) {
         int id = film.getId();
-        if (getFilm(id) != null) {
-            films.put(id, film);
-            log.info("Update {}", film);
-        } else {
+        if (getFilm(id) == null) {
             throw new NotFoundException(String.format("%s is not found and not update%n", film));
         }
+        films.put(id, film);
+        log.info("Update {}", film);
         return film;
     }
 
     @Override
     public Film getFilm(int id) {
-        Film film = films.get(id);
-        if (film == null) {
-            throw new NotFoundException(String.format("Film with id %d not found!%n", id));
-        }
-        return film;
+        return films.get(id);
     }
 
     @Override
@@ -72,33 +68,26 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public void like(int filmId, int userId) {
-        Film film = getFilm(filmId);
-        Set<Integer> likesFilm = likes.get(filmId);
-        if (likesFilm == null) {
-            likesFilm = new HashSet<>();
-            likesFilm.add(userId);
-            likes.put(filmId, likesFilm);
-        } else {
-            likesFilm.add(userId);
+        if (getFilm(filmId) == null) {
+            throw new NotFoundException(String.format("Film with id:%s not found.", filmId));
         }
-        log.info("Add like to {} ", film);
+        likes.get(filmId).add(userId);
+        log.info("Add like to film id:{} ", filmId);
     }
 
     @Override
     public void deleteLike(int filmId, int userId) {
-        Film film = getFilm(filmId);
-        Set<Integer> likesFilm = likes.get(filmId);
-        if (likesFilm != null) {
-            if (likesFilm.contains(userId)) {
-                likesFilm.remove(userId);
-                log.info("Like user id {} is delete from ", userId, film);
-                if (likesFilm.size() == 0) likes.remove(filmId);
-            } else {
-                throw new NotFoundException(String.format("%s note have like user with id %s%n", film, userId));
-            }
-        } else {
-            throw new NotFoundException(String.format("%s note have like%n", film));
+        if (getFilm(filmId) == null) {
+            throw new NotFoundException(String.format("Film with id:%d not found.", filmId));
         }
+        Set<Integer> likesFilm = likes.get(filmId);
+        if (likesFilm.contains(userId)) {
+            likesFilm.remove(userId);
+            log.info("Like user id {} is delete from film id:{}", userId, filmId);
+        } else {
+            throw new NotFoundException(String.format("Film id:%s not have like user with id:%s", filmId, userId));
+        }
+
     }
 
     @Override
@@ -120,7 +109,7 @@ public class InMemoryFilmStorage implements FilmStorage {
             log.info("Film with id {} delete", id);
             if (likes.containsKey(id)) likes.remove(id);
         } else {
-            throw new NotFoundException(String.format("Film with id %d not found", id));
+            throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
     }
 }

@@ -2,6 +2,7 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -25,7 +26,7 @@ public class FilmService {
     }
 
     public Film updateFilm(Film film) {
-        return filmStorage.createFilm(rebuildFilm(film));
+        return filmStorage.updateFilm(rebuildFilm(film));
     }
 
     public Film getFilm(int id) {
@@ -41,19 +42,26 @@ public class FilmService {
     }
 
     public void like(int filmId, int userId) {
-        if (userStorage.getUser(userId) != null)
-            filmStorage.like(filmId, userId);
+        if (filmStorage.getFilm(filmId) == null)
+            throw new NotFoundException(String.format("Film with id:%s not found.", filmId));
+        if (userStorage.getUser(userId) == null)
+            throw new NotFoundException(String.format("User with id:%s not found.", filmId));
+        filmStorage.like(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
-        if (userStorage.getUser(userId) != null)
-            filmStorage.deleteLike(filmId, userId);
+        if (filmStorage.getFilm(filmId) == null)
+            throw new NotFoundException(String.format("Film with id:%s not found.", filmId));
+        if (userStorage.getUser(userId) == null)
+            throw new NotFoundException(String.format("User with id:%s not found.", filmId));
+        filmStorage.deleteLike(filmId, userId);
     }
+
     public void clearAllFilms() {
         filmStorage.clearAllFilms();
     }
 
-    public void deleteFilm(int id){
+    public void deleteFilm(int id) {
         filmStorage.deleteFilm(id);
 
     }

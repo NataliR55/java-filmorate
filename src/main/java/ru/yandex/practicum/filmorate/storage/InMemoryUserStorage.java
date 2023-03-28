@@ -30,23 +30,18 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         int id = user.getId();
-        if (getUser(id) != null) {
-            users.put(id, user);
-            log.info("Update {}", user);
-        } else {
-            log.info("User with id: {} is NOT found!", id);
-            throw new NotFoundException("User with id:" + id + " {} is NOT found!");
+        if (getUser(id) == null) {
+            log.info("User with id: {} is NOT found and not update!", id);
+            throw new NotFoundException(String.format("User with id: %d not found and not update!", id));
         }
+        users.put(id, user);
+        log.info("Update {}", user);
         return user;
     }
 
     @Override
     public User getUser(int id) {
-        User user = users.get(id);
-        if (user == null) {
-            throw new NotFoundException("User with id " + id + " not found!");
-        }
-        return user;
+        return users.get(id);
     }
 
     @Override
@@ -57,10 +52,11 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public List<User> getUsersFriends(int id) {
         Set<Integer> friendsId = userFriends.get(id);
-        if (friendsId == null) {
-            throw new NotFoundException("User with id " + id + " not have friends!");
-        }
         List<User> listFriends = new ArrayList<>();
+        if (friendsId == null) {
+            log.info(String.format("User with id: %d not have friends!", id));
+            return listFriends;
+        }
         for (int friendID : friendsId) {
             User friend = getUser(friendID);
             if (friend != null) listFriends.add(friend);
@@ -72,10 +68,11 @@ public class InMemoryUserStorage implements UserStorage {
     public List<User> getCommonFriends(int id, int otherId) {
         Set<Integer> friendsId = userFriends.get(id);
         Set<Integer> otherFriendsId = userFriends.get(otherId);
-        if (friendsId == null || otherFriendsId == null) {
-            throw new NotFoundException("User with id " + id + " and id " + otherId + " not have common friends!");
-        }
         List<User> commonFriends = new ArrayList<>();
+        if (friendsId == null || otherFriendsId == null) {
+            log.info(String.format("User with id: %d  and id:%d not have common friends!", id, otherId));
+            return commonFriends;
+        }
         for (int friendID : friendsId) {
             if (otherFriendsId.contains(friendID))
                 commonFriends.add(getUser(friendID));
@@ -85,35 +82,46 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        User user = getUser(id);
-        User friend = getUser(friendId);
-        if (user == null || friend == null) {
-            throw new NotFoundException("To User with id " + id + " is not added friend  with id " + friendId);
+        if (getUser(id) == null) {
+            log.info("User with id:{} not added to friends id:{} ", friendId, id);
+            throw new NotFoundException(String.format("User with id: %d  is not found. Friend  with id:%d NOT add", id, friendId));
         }
-        Set<Integer> friendsId = userFriends.get(id);
-        if (friendsId == null) {
-            friendsId = new HashSet<>();
-            friendsId.add(friendId);
-            userFriends.put(id, friendsId);
-        } else {
-            friendsId.add(friendId);
+        if (getUser(friendId) == null) {
+            log.info("User with id:{} not added to friends id:{} ", friendId, id);
+            throw new NotFoundException(String.format("Friend with id: %d  is not found and not added to user with id: %d", friendId, id));
         }
-        log.info("User with id " + friendId + ", app to friends user id " + id);
+        for (int i = 0; i < 2; i++) {
+            int idUser = i == 0 ? id : friendId;
+            int idFriend = i == 0 ? friendId : id;
+            Set<Integer> idFriends = userFriends.get(idUser);
+            if (idFriends == null) {
+                idFriends = new HashSet<>();
+                idFriends.add(idFriend);
+                userFriends.put(idUser, idFriends);
+            } else {
+                idFriends.add(friendId);
+            }
+        }
+        log.info("User with id:{} add to friends user id:{} ", friendId, id);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        Set<Integer> friendsId = userFriends.get(id);
-        if (friendsId != null) {
-            if (friendsId.contains(friendId)) {
-                friendsId.remove(friendId);
-                log.info("User with id " + friendId + "is delete from friends user id " + id);
-                if (friendsId.size() == 0) userFriends.remove(id);
+        for (int i = 0; i < 2; i++) {
+            int idUser = i == 0 ? id : friendId;
+            int idFriend = i == 0 ? friendId : id;
+            Set<Integer> idFriends = userFriends.get(idUser);
+            if (idFriends != null) {
+                if (idFriends.contains(idFriend)) {
+                    idFriends.remove(idFriend);
+                    log.info("User with id:{} is delete from friends user id:{} ", idFriend, idUser);
+                    if (idFriends.size() == 0) userFriends.remove(idUser);
+                } else {
+                    throw new NotFoundException(String.format("User with id: %d is not friends user with id: %d", idFriend, idUser));
+                }
             } else {
-                throw new NotFoundException("User with id " + friendId + "is not friends user with id " + id);
+                throw new NotFoundException(String.format("User with id: %d is not have friends", idUser));
             }
-        } else {
-            throw new NotFoundException("User with id " + id + "is not have friends");
         }
     }
 
