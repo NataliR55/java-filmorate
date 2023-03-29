@@ -19,7 +19,9 @@ public class InMemoryFilmStorage implements FilmStorage {
 
     @Override
     public Film createFilm(Film film) {
-        if (film == null) throw new ValidationException("Film not be null");
+        if (film == null) {
+            throw new ValidationException("Film not be null");
+        }
         film.setId(++generateId);
         films.put(film.getId(), film);
         likes.put(film.getId(), new HashSet<>());

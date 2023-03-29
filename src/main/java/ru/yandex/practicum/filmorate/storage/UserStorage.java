@@ -11,7 +11,7 @@ public interface UserStorage {
 
     User getUser(int id);
 
-    void userFound(int id);
+    void isExistById(int id);
 
     List<User> getAllUsers();
 

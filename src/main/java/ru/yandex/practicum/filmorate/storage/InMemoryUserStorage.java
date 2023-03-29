@@ -18,9 +18,7 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-        if (findUserByDetails(user) != null) {
-            throw new ValidationException(String.format("%s with login or email already exist!", user));
-        }
+        findUserByDetails(user);
         user.setId(++generateId);
         users.put(user.getId(), user);
         log.info("Create {}", user);
@@ -30,7 +28,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User updateUser(User user) {
         int id = user.getId();
-        userFound(id);
+        isExistById(id);
         users.put(id, user);
         log.info("Update {}", user);
         return user;
@@ -78,7 +76,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void userFound(int id) {
+    public void isExistById(int id) {
         if (users.get(id) == null) {
             log.info("User with id:{} not exists.", id);
             throw new NotFoundException(String.format("User with id: %d  is not exist", id));
@@ -87,8 +85,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        userFound(id);
-        userFound(friendId);
+        isExistById(id);
+        isExistById(friendId);
         for (int i = 0; i < 2; i++) {
             int idUser = i == 0 ? id : friendId;
             int idFriend = i == 0 ? friendId : id;
@@ -106,8 +104,8 @@ public class InMemoryUserStorage implements UserStorage {
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        userFound(id);
-        userFound(friendId);
+        isExistById(id);
+        isExistById(friendId);
         for (int i = 0; i < 2; i++) {
             int idUser = i == 0 ? id : friendId;
             int idFriend = i == 0 ? friendId : id;
@@ -149,21 +147,29 @@ public class InMemoryUserStorage implements UserStorage {
         }
     }
 
-    private User findUserByDetails(User user) {
-        if (user == null) return null;
+    private void findUserByDetails(User user) {
+        if (user == null) {
+            log.info("User is null!");
+            throw new ValidationException(String.format("User is null!"));
+        }
         Optional<User> userFound;
         String email = user.getEmail();
         if ((email != null) && (!email.isBlank())) {
             userFound = users.values().stream().filter(t -> t.getEmail().toLowerCase()
                     .equals(email.toLowerCase().trim())).findFirst();
-            if (userFound.isPresent()) return userFound.get();
+            if (userFound.isPresent()) {
+                log.info("User with login {} already exist!", user.getLogin());
+                throw new ValidationException(String.format("User with login %s already exist!", user.getLogin()));
+            }
         }
         String login = user.getLogin();
         if ((login != null) && (!login.isBlank())) {
             userFound = users.values().stream().filter(t -> t.getLogin().equals(login.trim())).findFirst();
-            if (userFound.isPresent()) return userFound.get();
+            if (userFound.isPresent()) {
+                log.info("User with email {} already exist!", user.getEmail());
+                throw new ValidationException(String.format("User with email %s already exist!", user.getEmail()));
+            }
         }
-        return null;
     }
 }
 

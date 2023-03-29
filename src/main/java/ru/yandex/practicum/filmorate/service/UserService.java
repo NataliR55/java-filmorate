@@ -30,7 +30,7 @@ public class UserService {
     }
 
     public User getUser(int id) {
-        userStorage.userFound(id);
+        userStorage.isExistById(id);
         return userStorage.getUser(id);
     }
 
@@ -52,8 +52,8 @@ public class UserService {
 
     public List<User> getCommonFriends(int id, int otherId) {
         try {
-            userStorage.userFound(id);
-            userStorage.userFound(otherId);
+            userStorage.isExistById(id);
+            userStorage.isExistById(otherId);
             return userStorage.getCommonFriends(id, otherId);
         } catch (NotFoundException e) {
             return Collections.EMPTY_LIST;
@@ -66,7 +66,7 @@ public class UserService {
     }
 
     public void deleteUser(int id) {
-        userStorage.userFound(id);
+        userStorage.isExistById(id);
         filmStorage.deleteLikes(id);
         userStorage.deleteUser(id);
     }

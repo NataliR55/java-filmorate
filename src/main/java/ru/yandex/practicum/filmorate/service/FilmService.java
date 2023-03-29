@@ -42,18 +42,18 @@ public class FilmService {
 
     public void like(int filmId, int userId) {
         filmStorage.filmFound(filmId);
-        userStorage.userFound(userId);
+        userStorage.isExistById(userId);
         filmStorage.like(filmId, userId);
     }
 
     public void deleteLike(int filmId, int userId) {
         filmStorage.filmFound(filmId);
-        userStorage.userFound(userId);
+        userStorage.isExistById(userId);
         filmStorage.deleteLike(filmId, userId);
     }
 
     public void deleteLikes(int userId) {
-        userStorage.userFound(userId);
+        userStorage.isExistById(userId);
         filmStorage.deleteLikes(userId);
 
     }
