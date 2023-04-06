@@ -21,5 +21,20 @@ public class User {
     private String name;
     @Past(message = "Date of birth must be less than today")
     private LocalDate birthday;
+
+    public static class UserBuilder {
+        private String login;
+        private String name;
+
+        public UserBuilder login(String login) {
+            this.login = login.trim();
+            return this;
+        }
+
+        public UserBuilder name(String name) {
+            this.name = (name == null || name.isBlank()) ? login : name.trim();
+            return this;
+        }
+    }
 }
 

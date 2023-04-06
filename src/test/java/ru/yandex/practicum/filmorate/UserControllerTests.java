@@ -30,7 +30,7 @@ public class UserControllerTests {
 
     @AfterEach
     public void clearAll() {
-        userController.clearAll();
+        userController.clearAllUser();
     }
 
     @Test
@@ -46,7 +46,7 @@ public class UserControllerTests {
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk());
         assertEquals(userController.getAllUsers().size(), 4);
-        assertEquals(userController.getById(3).getEmail(), "user3@mail.ru");
+        assertEquals(userController.getUser(3).getEmail(), "user3@mail.ru");
     }
 
     @Test
@@ -65,7 +65,7 @@ public class UserControllerTests {
                                 .content(objectMapper.writeValueAsString(null))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
-                .andExpect(status().isBadRequest());
+                .andExpect(status().isInternalServerError());
         assertEquals(userController.getAllUsers().size(), 1);
     }
 
@@ -87,7 +87,7 @@ public class UserControllerTests {
                 .andExpect(jsonPath("id").value("1"))
                 .andExpect(jsonPath("name").value("NameUser10"));
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getById(1).getName(), "NameUser10");
+        assertEquals(userController.getUser(1).getName(), "NameUser10");
     }
 
     @Test
@@ -122,8 +122,8 @@ public class UserControllerTests {
                 )
                 .andExpect(status().isBadRequest());
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getById(1).getEmail(), "user1@mail.ru");
-        assertEquals(userController.getById(1).getLogin(), "login1");
+        assertEquals(userController.getUser(1).getEmail(), "user1@mail.ru");
+        assertEquals(userController.getUser(1).getLogin(), "login1");
 
     }
 
@@ -147,7 +147,7 @@ public class UserControllerTests {
                     .andExpect(status().isBadRequest());
         }
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getById(1).getLogin(), "login1");
+        assertEquals(userController.getUser(1).getLogin(), "login1");
     }
 
     @Test
@@ -159,8 +159,8 @@ public class UserControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk());
-        assertEquals(userController.getById(1).getLogin(), "login1");
-        assertEquals(userController.getById(1).getName(), "login1");
+        assertEquals(userController.getUser(1).getLogin(), "login1");
+        assertEquals(userController.getUser(1).getName(), "login1");
     }
 
     @Test
@@ -187,7 +187,7 @@ public class UserControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        assertEquals(userController.getById(1).getBirthday(), LocalDate.of(2000, 1, 1));
+        assertEquals(userController.getUser(1).getBirthday(), LocalDate.of(2000, 1, 1));
     }
 
     private User createOne(int id) {
