@@ -4,7 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
-import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.model.user.StatusFriendship;
+import ru.yandex.practicum.filmorate.model.user.User;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -84,7 +85,7 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     @Override
-    public void addFriend(int id, int friendId) {
+    public void addFriend(int id, int friendId, StatusFriendship statusFriendship) {
         isExistById(id);
         isExistById(friendId);
         for (int i = 0; i < 2; i++) {
@@ -100,6 +101,16 @@ public class InMemoryUserStorage implements UserStorage {
             }
         }
         log.info("User with id:{} add to friends user id:{} ", friendId, id);
+    }
+
+    @Override
+    public StatusFriendship getStatusFriendship(int id, int friendId) {
+        return StatusFriendship.NOSTATUS;
+    }
+
+    @Override
+    public void updateStatusFriend(int id, int friendId, StatusFriendship statusFriendship) {
+        return;
     }
 
     @Override
@@ -148,10 +159,6 @@ public class InMemoryUserStorage implements UserStorage {
     }
 
     private void findUserByDetails(User user) {
-        if (user == null) {
-            log.info("User is null!");
-            throw new ValidationException(String.format("User is null!"));
-        }
         Optional<User> userFound;
         String email = user.getEmail();
         if ((email != null) && (!email.isBlank())) {
