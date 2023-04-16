@@ -77,6 +77,8 @@ public class FilmService {
                 .description(film.getDescription())
                 .releaseDate(film.getReleaseDate())
                 .duration(film.getDuration())
+                .mpa(film.getMpa())
+                .genres(film.getGenres())
                 .build();
     }
 
