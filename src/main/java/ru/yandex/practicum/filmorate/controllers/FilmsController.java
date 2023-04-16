@@ -10,8 +10,6 @@ import ru.yandex.practicum.filmorate.service.FilmService;
 import javax.validation.Valid;
 import java.util.List;
 
-
-@Slf4j
 @RestController
 @Validated
 @RequestMapping("/films")
@@ -22,7 +20,6 @@ public class FilmsController {
     public FilmsController(FilmService filmService) {
         this.filmService = filmService;
     }
-
 
     @PostMapping()
     public Film createFilm(@Valid @RequestBody Film film) {
@@ -57,7 +54,6 @@ public class FilmsController {
     public void like(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {
         filmService.like(filmId, userId);
     }
-
 
     @DeleteMapping("/{id}/like/{userId}")
     public void deleteLike(@PathVariable("id") int filmId, @PathVariable("userId") int userId) {

@@ -2,8 +2,12 @@ package ru.yandex.practicum.filmorate.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
@@ -16,7 +20,7 @@ public class FilmService {
     private final UserStorage userStorage;
 
     @Autowired
-    public FilmService(@Qualifier("filmDbStorage")FilmStorage filmStorage, @Qualifier("userDbStorage")UserStorage userStorage) {
+    public FilmService(@Qualifier("filmDbStorage") FilmStorage filmStorage, @Qualifier("userDbStorage") UserStorage userStorage) {
         this.filmStorage = filmStorage;
         this.userStorage = userStorage;
     }
@@ -74,5 +78,21 @@ public class FilmService {
                 .releaseDate(film.getReleaseDate())
                 .duration(film.getDuration())
                 .build();
+    }
+
+    public List<Genre> getGenres() {
+        return filmStorage.getGenres();
+    }
+
+    public Genre getGenreById(int id) {
+        return filmStorage.getGenreById(id);
+    }
+
+    public List<Mpa> getMpaRatings() {
+        return filmStorage.getMpaRatings();
+    }
+
+    public Mpa getMpaById(int id) {
+        return filmStorage.getMpaById(id);
     }
 }

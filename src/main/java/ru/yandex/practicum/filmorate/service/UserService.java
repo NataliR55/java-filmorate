@@ -9,7 +9,6 @@ import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.user.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
-import ru.yandex.practicum.filmorate.storage.InMemoryUserStorage;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Collections;
@@ -51,12 +50,12 @@ public class UserService {
     public void addFriend(int id1, int id2) {
         StatusFriendship statusFriendship12 = userStorage.getStatusFriendship(id1, id2);
         StatusFriendship statusFriendship21 = userStorage.getStatusFriendship(id2, id1);
-        if (statusFriendship12 == StatusFriendship.UNCONFIRMED) {
-            statusFriendship12 = StatusFriendship.CONFIRMED;
-            userStorage.updateStatusFriend(id1, id2, statusFriendship12);
+        if (statusFriendship21 == StatusFriendship.UNCONFIRMED) {
+            statusFriendship21 = StatusFriendship.CONFIRMED;
+            userStorage.updateStatusFriend(id2, id1, statusFriendship21);
         }
-        if (statusFriendship21 == StatusFriendship.NOSTATUS) {
-            userStorage.addFriend(id2, id1, statusFriendship12 == StatusFriendship.CONFIRMED
+        if (statusFriendship12 == StatusFriendship.NOSTATUS) {
+            userStorage.addFriend(id1, id2, statusFriendship21 == StatusFriendship.CONFIRMED
                     ? StatusFriendship.CONFIRMED : StatusFriendship.UNCONFIRMED);
         }
     }

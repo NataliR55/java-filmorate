@@ -5,6 +5,8 @@ import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.exception.ValidationException;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.Mpa;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -126,5 +128,25 @@ public class InMemoryFilmStorage implements FilmStorage {
         } else {
             throw new NotFoundException(String.format("Film with id: %d not found", id));
         }
+    }
+
+    @Override
+    public List<Genre> getGenres() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        return null;
+    }
+
+    @Override
+    public List<Mpa> getMpaRatings() {
+        return Collections.EMPTY_LIST;
+    }
+
+    @Override
+    public Mpa getMpaById(int id) {
+        return null;
     }
 }

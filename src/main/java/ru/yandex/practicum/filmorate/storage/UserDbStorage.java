@@ -43,10 +43,10 @@ public class UserDbStorage implements UserStorage {
     }
 
     @Override
-    public List<User> getCommonFriends(int id, int otherId) {
+    public List<User> getCommonFriends(int id1, int id2) {
         final String sqlQuery = "SELECT * FROM USERS WHERE user_id IN (SELECT friend_id FROM Friends WHERE user_id=?) " +
                 "INTERSECT SELECT * FROM USERS WHERE user_id IN (SELECT friend_id FROM Friends WHERE user_id=?)";
-        return jdbcTemplate.query(sqlQuery, new UserMapper(), id, otherId);
+        return jdbcTemplate.query(sqlQuery, new UserMapper(), id1, id2);
     }
 
     @Override
@@ -56,7 +56,7 @@ public class UserDbStorage implements UserStorage {
                 user.getLogin(),
                 user.getName(),
                 user.getBirthday());
-        log.info("User created: " + user.getName());
+        log.info("Create {}", user);
         return jdbcTemplate.queryForObject("SELECT * FROM Users ORDER BY user_id DESC LIMIT 1", new UserMapper());
     }
 
@@ -83,7 +83,7 @@ public class UserDbStorage implements UserStorage {
     public void addFriend(int id, int friendId, StatusFriendship status) throws EmptyResultDataAccessException {
         isExistById(id);
         isExistById(friendId);
-        jdbcTemplate.update("INSERT INTO Friends (user_id, friend_id,status) VALUES (?, ?, ?)", id, friendId, status.name());
+        jdbcTemplate.update("INSERT INTO Friends (user_id, friend_id, status) VALUES (?, ?, ?)", id, friendId, status.name());
     }
 
     @Override
@@ -96,7 +96,6 @@ public class UserDbStorage implements UserStorage {
     @Override
     public void deleteFriend(int id, int friendId) {
         jdbcTemplate.update("DELETE FROM Friends WHERE user_id=? AND friend_id=?", id, friendId);
-        jdbcTemplate.update("DELETE FROM Friends WHERE user_id=? AND friend_id=?", friendId, id);
     }
 
     @Override

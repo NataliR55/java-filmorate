@@ -3,12 +3,16 @@ package ru.yandex.practicum.filmorate.storage;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
 import ru.yandex.practicum.filmorate.mapper.GenreMapper;
+import ru.yandex.practicum.filmorate.mapper.MpaMapper;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.Mpa;
 
 import java.util.List;
 
@@ -31,6 +35,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setGenres(getGenresFilm(id));
         return film;
     }
+
     List<Genre> getGenresFilm(int filmId) {
         String sqlQuery = "SELECT * FROM Film_Genre JOIN Genres ON Film_Genre.genre_id=Genres.genre_id WHERE film_id = ?";
         return jdbcTemplate.query(sqlQuery, new GenreMapper(), filmId);
@@ -60,12 +65,12 @@ public class FilmDbStorage implements FilmStorage {
     }
 
 
-
     private List<Genre> getAllFilmsGenres(int filmId) {
-        final String sqlQuery ="SELECT * FROM Film_Genre JOIN Genres ON Film_Genre.genre_id=Genres.genre_id WHERE film_id = ?";
+        final String sqlQuery = "SELECT * FROM Film_Genre JOIN Genres ON Film_Genre.genre_id=Genres.genre_id WHERE film_id = ?";
         List<Genre> filmGenres = jdbcTemplate.query(sqlQuery, new GenreMapper(), filmId);
         return filmGenres;
     }
+
     private Film updateFilmsGenre(Film film, int filmId) {
         if (film.getGenres() != null && film.getGenres().isEmpty()) {
             deleteGenre(filmId);
@@ -110,12 +115,12 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public void like(int filmId, int userId) {
-
+        jdbcTemplate.update("INSERT INTO Likes(film_id, user_id) VALUES (?, ?)", filmId, userId);
     }
 
     @Override
     public void deleteLike(int filmId, int userId) {
-
+        jdbcTemplate.update("DELETE FROM Likes WHERE film_id=? AND user_id=?", filmId, userId);
     }
 
     @Override
@@ -136,5 +141,39 @@ public class FilmDbStorage implements FilmStorage {
     @Override
     public void deleteFilm(int id) {
 
+    }
+
+    @Override
+    public List<Genre> getGenres() {
+        return jdbcTemplate.query("SELECT * FROM Genres", new GenreMapper());
+    }
+
+    @Override
+    public Genre getGenreById(int id) {
+        Genre genre;
+        try {
+            genre = jdbcTemplate.queryForObject("SELECT * FROM Genres WHERE genre_id=?", new GenreMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("Genre with id:{} not exists.", id);
+            throw new NotFoundException(String.format("Genre with id:%d is not exist", id));
+        }
+        return genre;
+    }
+
+    @Override
+    public List<Mpa> getMpaRatings() {
+        return jdbcTemplate.query("SELECT * FROM Mpa", new MpaMapper());
+    }
+
+    @Override
+    public Mpa getMpaById(int id) {
+        Mpa mpa;
+        try {
+            mpa = jdbcTemplate.queryForObject("SELECT * FROM Mpa WHERE mpa_id=?", new MpaMapper(), id);
+        } catch (EmptyResultDataAccessException e) {
+            log.info("Mpa with id:{} not exists.", id);
+            throw new NotFoundException(String.format("Mpa with id: %d is not exist", id));
+        }
+        return mpa;
     }
 }
