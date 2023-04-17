@@ -53,6 +53,7 @@ public class UserService {
         if (statusFriendship21 == StatusFriendship.UNCONFIRMED) {
             statusFriendship21 = StatusFriendship.CONFIRMED;
             userStorage.updateStatusFriend(id2, id1, statusFriendship21);
+
         }
         if (statusFriendship12 == StatusFriendship.NOSTATUS) {
             userStorage.addFriend(id1, id2, statusFriendship21 == StatusFriendship.CONFIRMED
