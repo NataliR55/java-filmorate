@@ -14,6 +14,7 @@ import java.util.List;
 @RequestMapping("/mpa")
 public class MpaController {
     private final FilmService filmService;
+
     @Autowired
     public MpaController(FilmService filmService) {
         this.filmService = filmService;
@@ -23,6 +24,7 @@ public class MpaController {
     public Mpa getMpaById(@PathVariable int id) {
         return filmService.getMpaById(id);
     }
+
     @GetMapping()
     public List<Mpa> getMPARatings() {
         return filmService.getMpaRatings();

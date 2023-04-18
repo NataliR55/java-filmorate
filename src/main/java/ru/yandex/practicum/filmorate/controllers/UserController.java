@@ -14,7 +14,6 @@ import java.util.List;
 @RequestMapping("/users")
 @Validated
 public class UserController {
-
     private final UserService userService;
 
     @Autowired
@@ -70,6 +69,5 @@ public class UserController {
     public void deleteUser(@PathVariable int id) {
         userService.deleteUser(id);
     }
-
 
 }
