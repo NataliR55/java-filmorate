@@ -35,7 +35,7 @@ public class UserControllerTests {
 
     @Test
     public void getUsers() throws Exception {
-        User[] users = {createOne(1), createOne(2), createOne(3), createOne(4)};
+        User[] users = {createUser(1), createUser(2), createUser(3), createUser(4)};
         assertEquals(userController.getAllUsers().size(), 0);
         for (User user : users) {
             mockMvc.perform(post("/users")
@@ -46,20 +46,26 @@ public class UserControllerTests {
         mockMvc.perform(get("/users"))
                 .andExpect(status().isOk());
         assertEquals(userController.getAllUsers().size(), 4);
-        assertEquals(userController.getUser(3).getEmail(), "user3@mail.ru");
+        int id = userController.getAllUsers().get(2).getId();
+        assertEquals(userController.getUser(id).getEmail(), "user3@mail.ru");
+    }
+
+
+    private int getUsersId(int index) {
+        return userController.getAllUsers().size() == 0 ? 1 : userController.getAllUsers().get(index).getId();
     }
 
     @Test
     public void postUser() throws Exception {
-        User user = createOne(10);
+        User user = createUser(10);
         mockMvc.perform(
                         post("/users")
                                 .content(objectMapper.writeValueAsString(user))
                                 .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("id").value(1))
                 .andExpect(jsonPath("name").value("NameUser10"));
+
         mockMvc.perform(
                         post("/users")
                                 .content(objectMapper.writeValueAsString(null))
@@ -67,38 +73,40 @@ public class UserControllerTests {
                 )
                 .andExpect(status().isInternalServerError());
         assertEquals(userController.getAllUsers().size(), 1);
+
     }
 
     @Test
     public void putUser() throws Exception {
-        User user = createOne(1);
+        User user = createUser(1);
         mockMvc.perform(
                 post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
         ).andExpect(status().isOk());
-        user = createOne(10);
-        user.setId(1);
+        user = createUser(10);
+        int id = getUsersId(0);
+        user.setId(id);
         mockMvc.perform(put("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("id").value("1"))
+                .andExpect(jsonPath("id").value(id))
                 .andExpect(jsonPath("name").value("NameUser10"));
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getUser(1).getName(), "NameUser10");
+        assertEquals(userController.getUser(id).getName(), "NameUser10");
     }
 
     @Test
     public void checkEmail() throws Exception {
-        User user = createOne(1);
+        User user = createUser(1);
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk());
-        user = createOne(2);
+        user = createUser(2);
         user.setEmail("user2#$$mail.ru");
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
@@ -106,7 +114,7 @@ public class UserControllerTests {
                 )
                 .andExpect(status().isBadRequest());
         assertEquals(userController.getAllUsers().size(), 1);
-        user = createOne(3);
+        user = createUser(3);
         user.setEmail("&user3#mail_ru");
         user.setId(1);
         mockMvc.perform(put("/users")
@@ -114,7 +122,7 @@ public class UserControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        user = createOne(4);
+        user = createUser(4);
         user.setEmail("");
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
@@ -122,14 +130,15 @@ public class UserControllerTests {
                 )
                 .andExpect(status().isBadRequest());
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getUser(1).getEmail(), "user1@mail.ru");
-        assertEquals(userController.getUser(1).getLogin(), "login1");
+        int id = getUsersId(0);
+        assertEquals(userController.getUser(id).getEmail(), "user1@mail.ru");
+        assertEquals(userController.getUser(id).getLogin(), "login1");
 
     }
 
     @Test
     public void checkLogin() throws Exception {
-        User user = createOne(1);
+        User user = createUser(1);
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,7 +147,7 @@ public class UserControllerTests {
 
         String[] badLogins = {"2LoginBad", "", "Koro  vart12", "Korova@", "Korova&", "ro"};
         for (int i = 0; i < badLogins.length; i++) {
-            user = createOne(i + 2);
+            user = createUser(i + 2);
             user.setLogin(badLogins[i]);
             mockMvc.perform(post("/users")
                             .content(objectMapper.writeValueAsString(user))
@@ -147,31 +156,33 @@ public class UserControllerTests {
                     .andExpect(status().isBadRequest());
         }
         assertEquals(userController.getAllUsers().size(), 1);
-        assertEquals(userController.getUser(1).getLogin(), "login1");
+        int id = getUsersId(0);
+        assertEquals(userController.getUser(id).getLogin(), "login1");
     }
 
     @Test
     public void checkName() throws Exception {
-        User user = createOne(1);
+        User user = createUser(1);
         user.setName("");
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk());
-        assertEquals(userController.getUser(1).getLogin(), "login1");
-        assertEquals(userController.getUser(1).getName(), "login1");
+        int id = getUsersId(0);
+        assertEquals(userController.getUser(id).getLogin(), "login1");
+        assertEquals(userController.getUser(id).getName(), "login1");
     }
 
     @Test
     public void checkBirthday() throws Exception {
-        User user = createOne(1);
+        User user = createUser(1);
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isOk());
-        user = createOne(2);
+        user = createUser(2);
         user.setBirthday(LocalDate.of(2030, 10, 12));
         mockMvc.perform(post("/users")
                         .content(objectMapper.writeValueAsString(user))
@@ -179,7 +190,7 @@ public class UserControllerTests {
                 )
                 .andExpect(status().isBadRequest());
         assertEquals(userController.getAllUsers().size(), 1);
-        user = createOne(3);
+        user = createUser(3);
         user.setId(1);
         user.setBirthday(LocalDate.of(2028, 11, 12));
         mockMvc.perform(put("/users")
@@ -187,10 +198,11 @@ public class UserControllerTests {
                         .contentType(MediaType.APPLICATION_JSON)
                 )
                 .andExpect(status().isBadRequest());
-        assertEquals(userController.getUser(1).getBirthday(), LocalDate.of(2000, 1, 1));
+        int id = getUsersId(0);
+        assertEquals(userController.getUser(id).getBirthday(), LocalDate.of(2000, 1, 1));
     }
 
-    private User createOne(int id) {
+    private User createUser(int id) {
         return User.builder()
                 .id(0)
                 .login("login" + id)

@@ -8,15 +8,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 import ru.yandex.practicum.filmorate.model.film.Film;
 import ru.yandex.practicum.filmorate.model.film.Genre;
 import ru.yandex.practicum.filmorate.model.film.Mpa;
+import ru.yandex.practicum.filmorate.model.user.StatusFriendship;
 import ru.yandex.practicum.filmorate.model.user.User;
 import ru.yandex.practicum.filmorate.storage.FilmDbStorage;
-import ru.yandex.practicum.filmorate.storage.FilmStorage;
 import ru.yandex.practicum.filmorate.storage.UserDbStorage;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
@@ -26,10 +25,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 class FilmorateApplicationTests {
     private final UserDbStorage userStorage;
     private final FilmDbStorage filmStorage;
-
-    @Test
-    void contextLoads() {
-    }
 
     @Test
     void testGenres() {
@@ -47,21 +42,6 @@ class FilmorateApplicationTests {
         List<Mpa> mpas = filmStorage.getMpaRatings();
         assertThat(mpas.size()).isEqualTo(5);
         assertThat(mpas.get(4).getName()).isEqualTo("NC-17");
-    }
-
-    @Test
-    public void testFindUserById() {
-        User user1 = User.builder().id(1).name("tttt").email("ee@mail.ru").login("u26354").birthday(LocalDate.of(2000, 1, 1)).build();
-        //user1 = null;
-        Optional<User> userOptional0 = Optional.ofNullable(user1);
-        //Optional<User> userOptional = Optional.ofNullable(user1);
-        Optional<User> userOptional = userOptional0;
-        //Optional<User> userOptional = userStorage.findUserById(1);
-        assertThat(userOptional)
-                .isPresent()
-                .hasValueSatisfying(user ->
-                        assertThat(user).hasFieldOrPropertyWithValue("id", 1)
-                );
     }
 
     @Test
@@ -87,12 +67,27 @@ class FilmorateApplicationTests {
         assertThat(filmFromDb.getGenres().size()).isEqualTo(3);
         assertThat(filmFromDb.getGenres().get(2).getName()).isEqualTo("Триллер");
     }
+
+
     @Test
     public void testUser() {
-        User user = createUser(1);
-        userStorage.createUser(user);
-
+        User userFromDb1 = userStorage.createUser(createUser(1));
+        int id1 = userFromDb1.getId();
+        User userFromDb2 = userStorage.createUser(createUser(2));
+        int id2 = userFromDb2.getId();
+        userStorage.addFriend(id1, id2, StatusFriendship.UNCONFIRMED);
+        userStorage.addFriend(id2, id1, StatusFriendship.CONFIRMED);
+        assertThat(userStorage.getStatusFriendship(id1, id2)).isNotNull();
+        assertThat(userStorage.getStatusFriendship(id1, id2).name()).isEqualTo("UNCONFIRMED");
+        assertThat(userStorage.getStatusFriendship(id2, id1)).isNotNull();
+        assertThat(userStorage.getStatusFriendship(id2, id1).name()).isEqualTo("CONFIRMED");
+        User user = createUser(3);
+        user.setId(1);
+        userStorage.updateUser(user);
+        assertThat(userStorage.getUser(1).getName()).isEqualTo(user.getName());
+        assertThat(userStorage.getAllUsers().size()).isEqualTo(2);
     }
+
     private Film createFilm(int id) {
         int mpaID = getRandom(1, 4);
         Mpa mpa = filmStorage.getMpaById(mpaID);

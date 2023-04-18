@@ -55,21 +55,13 @@ public class UserDbStorage implements UserStorage {
 
     @Override
     public User createUser(User user) {
-    /*    jdbcTemplate.update("INSERT INTO Users (email, login, name, birthday) VALUES (?, ?, ?, ?)",
-                user.getEmail(),
-                user.getLogin(),
-                user.getName(),
-                user.getBirthday());
-        log.info("Create {}", user);
-        return jdbcTemplate.queryForObject("SELECT * FROM Users ORDER BY user_id DESC LIMIT 1", new UserMapper());
-*/
         String sqlQuery = "INSERT INTO Users (email, login, name, birthday) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"film_id"});
+            PreparedStatement stmt = connection.prepareStatement(sqlQuery, new String[]{"user_id"});
             stmt.setString(1, user.getEmail());
             stmt.setString(2, user.getLogin());
-            stmt.setString(2, user.getName());
+            stmt.setString(3, user.getName());
             stmt.setDate(4, Date.valueOf(user.getBirthday()));
             return stmt;
         }, keyHolder);
