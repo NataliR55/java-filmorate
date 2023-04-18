@@ -1,17 +1,24 @@
 package ru.yandex.practicum.filmorate;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.RequiredArgsConstructor;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.AutoConfigureTestDatabase;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import ru.yandex.practicum.filmorate.controllers.FilmsController;
 import ru.yandex.practicum.filmorate.model.film.Film;
+import ru.yandex.practicum.filmorate.model.film.Genre;
+import ru.yandex.practicum.filmorate.model.film.Mpa;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -19,6 +26,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
+@AutoConfigureTestDatabase
+@RequiredArgsConstructor(onConstructor_ = @Autowired)
 public class FilmsControllerTests {
     @Autowired
     private MockMvc mockMvc;
@@ -29,21 +38,35 @@ public class FilmsControllerTests {
 
     @AfterEach
     public void clearAll() {
+
         filmsController.clearAllFilms();
     }
 
     private Film createFilm(int id) {
+        Mpa mpa = new Mpa();
+
+        mpa.setId(1);
+        mpa.setName("G");
+        Genre genre=new Genre();
+        genre.setId(1);
+        genre.setName("Комедия");
+        List<Genre> genreList=new ArrayList<>();
+        genreList.add(genre);
         return Film.builder()
-                .id(0)
+                .id(id)
                 .name("nameFilm" + id)
                 .description("descriptionFilm" + id)
                 .duration((int) (Math.random() * 160))
-                .releaseDate(LocalDate.of(1990, 1, (id < 31 ? id : 1))).build();
+                .releaseDate(LocalDate.of(1990, 1, (id < 31 ? id : 1)))
+                .mpa(mpa)
+                .genres(genreList)
+                .build();
     }
 
     @Test
     public void getFilms() throws Exception {
         Film[] films = {createFilm(1), createFilm(2), createFilm(3), createFilm(4)};
+
         assertEquals(filmsController.getAllFilms().size(), 0);
         for (Film film : films) {
             mockMvc.perform(post("/films")
@@ -54,8 +77,8 @@ public class FilmsControllerTests {
         mockMvc.perform(get("/films"))
                 .andExpect(status().isOk());
         assertEquals(filmsController.getAllFilms().size(), 4);
+        System.out.println(filmsController.getAllFilms());
         assertEquals(filmsController.getFilm(3).getName(), "nameFilm3");
-
     }
 
     @Test
@@ -75,6 +98,7 @@ public class FilmsControllerTests {
 
     @Test
     public void checkName() throws Exception {
+        System.out.println(filmsController.getAllFilms());
         Film film = createFilm(1);
         mockMvc.perform(post("/films")
                         .content(objectMapper.writeValueAsString(film))

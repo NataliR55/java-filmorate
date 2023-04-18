@@ -80,7 +80,7 @@ public class FilmDbStorage implements FilmStorage {
         film.setId(filmId);
         setFilmsGenres(film);
         log.info("Create {}", film);
-        return film;
+        return getFilm(filmId);
     }
 
     private void setFilmsGenres(Film film) {
