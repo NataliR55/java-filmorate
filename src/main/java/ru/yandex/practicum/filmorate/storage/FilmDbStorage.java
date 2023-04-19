@@ -7,6 +7,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.jdbc.support.rowset.SqlRowSet;
 import org.springframework.stereotype.Repository;
 import ru.yandex.practicum.filmorate.exception.NotFoundException;
 import ru.yandex.practicum.filmorate.mapper.FilmMapper;
@@ -18,6 +19,7 @@ import ru.yandex.practicum.filmorate.model.film.Mpa;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -131,8 +133,41 @@ public class FilmDbStorage implements FilmStorage {
 
     @Override
     public List<Film> getAllFilms() {
-        List<Film> filmsWithoutGenres = jdbcTemplate.query(ALL_FILMS_SQL_QUERY, new FilmMapper());
-        return addGenresInFilm(filmsWithoutGenres);
+        final String sqlQuery = "select film.film_id, film.name AS NAME, film.description, film.releaseDate, "
+                + "film.duration, film.mpa_id, mpa.mpa_name, "
+                + "film_genre.genre_id, genres.name AS GENRES_NAME "
+                + "FROM FILMS AS film "
+                + "LEFT OUTER JOIN mpa AS mpa ON mpa.mpa_id = film.mpa_id "
+                + "LEFT OUTER JOIN film_genre AS film_genre ON film_genre.film_id = film.film_id "
+                + "LEFT OUTER JOIN genres AS genres ON genres.genre_id = film_genre.genre_id "
+                + "ORDER BY film_id, NAME;";
+        SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery);
+        Map<Integer, Film> films = new HashMap<>();
+        while (filmRows.next()) {
+            int film_id = filmRows.getInt("film_id");
+            Film film = films.get(film_id);
+            if (film == null) {
+                Mpa mpa = new Mpa();
+                mpa.setId(filmRows.getInt("mpa_id"));
+                mpa.setName(filmRows.getString("mpa_name"));
+                film = Film.builder()
+                        .id(film_id)
+                        .name(filmRows.getString("NAME"))
+                        .description(filmRows.getString("description"))
+                        .releaseDate(filmRows.getDate("releaseDate").toLocalDate())
+                        .duration(filmRows.getInt("duration"))
+                        .mpa(mpa)
+                        .build();
+                films.put(film_id, film);
+            }
+            if (Optional.ofNullable(filmRows.getString("genre_id")).isPresent()) {
+                Genre genre = new Genre();
+                genre.setId(filmRows.getInt("genre_id"));
+                genre.setName(filmRows.getString("GENRES_NAME"));
+                film.getGenres().add(genre);
+            }
+        }
+        return films.values().stream().collect(Collectors.toList());
     }
 
     private List<Film> addGenresInFilm(List<Film> films) {
