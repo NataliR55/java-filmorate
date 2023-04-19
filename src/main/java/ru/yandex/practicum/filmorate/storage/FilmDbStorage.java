@@ -143,21 +143,21 @@ public class FilmDbStorage implements FilmStorage {
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery);
         Map<Integer, Film> films = new HashMap<>();
         while (filmRows.next()) {
-            int film_id = filmRows.getInt("film_id");
-            Film film = films.get(film_id);
+            int filmId = filmRows.getInt("film_id");
+            Film film = films.get(filmId);
             if (film == null) {
                 Mpa mpa = new Mpa();
                 mpa.setId(filmRows.getInt("mpa_id"));
                 mpa.setName(filmRows.getString("mpa_name"));
                 film = Film.builder()
-                        .id(film_id)
+                        .id(filmId)
                         .name(filmRows.getString("NAME"))
                         .description(filmRows.getString("description"))
                         .releaseDate(filmRows.getDate("releaseDate").toLocalDate())
                         .duration(filmRows.getInt("duration"))
                         .mpa(mpa)
                         .build();
-                films.put(film_id, film);
+                films.put(filmId, film);
             }
             if (Optional.ofNullable(filmRows.getString("genre_id")).isPresent()) {
                 Genre genre = new Genre();
