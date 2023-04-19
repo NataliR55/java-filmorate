@@ -131,16 +131,16 @@ public class FilmDbStorage implements FilmStorage {
         return getFilm(filmId);
     }
 
-    @Override
-    public List<Film> getAllFilms() {
-        final String sqlQuery = "select film.film_id, film.name AS NAME, film.description, film.releaseDate, "
+    private List<Film> getFilmsWithCondition(String setCondition) {
+        final String sqlQuery = "SELECT film.film_id, film.name AS NAME, film.description, film.releaseDate, "
                 + "film.duration, film.mpa_id, mpa.mpa_name, "
                 + "film_genre.genre_id, genres.name AS GENRES_NAME "
                 + "FROM FILMS AS film "
-                + "LEFT OUTER JOIN mpa AS mpa ON mpa.mpa_id = film.mpa_id "
+                + " LEFT OUTER JOIN mpa AS mpa ON mpa.mpa_id = film.mpa_id "
                 + "LEFT OUTER JOIN film_genre AS film_genre ON film_genre.film_id = film.film_id "
                 + "LEFT OUTER JOIN genres AS genres ON genres.genre_id = film_genre.genre_id "
-                + "ORDER BY film_id, NAME;";
+                + setCondition
+                + "ORDER BY film_id, NAME ";
         SqlRowSet filmRows = jdbcTemplate.queryForRowSet(sqlQuery);
         Map<Integer, Film> films = new HashMap<>();
         while (filmRows.next()) {
@@ -170,35 +170,22 @@ public class FilmDbStorage implements FilmStorage {
         return films.values().stream().collect(Collectors.toList());
     }
 
-    private List<Film> addGenresInFilm(List<Film> films) {
-        final String genreQuery = "SELECT * FROM Film_Genre JOIN Genres ON Film_Genre.genre_id=Genres.genre_id";
-        List<Map<String, Object>> rows = jdbcTemplate.queryForList(genreQuery);
-        for (Film film : films) {
-            List<Genre> allFilmsGenres = rows.stream()
-                    .filter(stringObjectMap -> (int) stringObjectMap.get("FILM_ID") == film.getId())
-                    .map(stringObjectMap -> {
-                        Genre genre = new Genre();
-                        genre.setId((Integer) stringObjectMap.get("GENRE_ID"));
-                        genre.setName((String) stringObjectMap.get("NAME"));
-                        return genre;
-                    })
-                    .collect(Collectors.toList());
-            film.setGenres(allFilmsGenres);
-        }
-        return films;
+    @Override
+    public List<Film> getAllFilms() {
+        return getFilmsWithCondition("");
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        final String sqlQuery = ALL_FILMS_SQL_QUERY +
-                "WHERE film_id IN (SELECT film_id FROM Likes GROUP BY film_id ORDER BY COUNT(user_id) DESC LIMIT ?)";
-        List<Film> popularFilms = jdbcTemplate.query(sqlQuery, new FilmMapper(), count);
+        String setCondition = "WHERE film.film_id IN (SELECT film_id FROM Likes GROUP BY film_id "
+                + "ORDER BY COUNT(user_id) DESC LIMIT " + count + " )";
+        List<Film> popularFilms = getFilmsWithCondition(setCondition);
         if (popularFilms.size() < count) {
             List<Film> additionalFilms = getAllFilms();
             popularFilms.removeAll(additionalFilms);
             popularFilms.addAll(additionalFilms);
         }
-        return addGenresInFilm(popularFilms);
+        return popularFilms;
     }
 
     @Override
