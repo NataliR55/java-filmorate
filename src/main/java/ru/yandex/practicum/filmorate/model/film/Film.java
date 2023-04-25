@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.model;
+package ru.yandex.practicum.filmorate.model.film;
 
 import lombok.Builder;
 import lombok.Data;
@@ -12,6 +12,8 @@ import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Positive;
 import javax.validation.constraints.Size;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Slf4j
 @Data
@@ -29,6 +31,9 @@ public class Film {
     private LocalDate releaseDate;
     @Positive(message = "Duration film must be positive!")
     private int duration;
+    private Mpa mpa;
+    @Builder.Default
+    private List<Genre> genres = new ArrayList<>();
 
     public static class FilmBuilder {
         private LocalDate releaseDate;
